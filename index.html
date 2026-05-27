@@ -85,7 +85,7 @@
 const TRANSLATE_URL = 'https://john-174a7c51.base44.app/functions/translate';
 let direction = 'en-fil', inputMode = 'voice', isRecording = false;
 let finalTranscript = '', recognition = null, activeRec = false;
-let lastTranslated = '', lastSpeakLang = 'fil-PH';
+let lastTranslated = '', lastSpeakLang = 'tl';
 
 function setDir(dir) {
   direction = dir;
@@ -147,7 +147,7 @@ async function doTranslate(text) {
   showStatus('⏳ Nagsasalin...'); hide('translatedBox'); hide('actionBtns');
   try {
     const from = isEnFil ? 'en' : 'tl', to = isEnFil ? 'tl' : 'en';
-    lastSpeakLang = isEnFil ? 'fil-PH' : 'en-US';
+    lastSpeakLang = isEnFil ? 'tl' : 'en';
     const res = await fetch(TRANSLATE_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text:text.trim(),from,to}) });
     const data = await res.json();
     if (data.translated) { lastTranslated = data.translated; document.getElementById('translatedText').textContent = data.translated; show('translatedBox'); hide('statusMsg'); show('actionBtns'); }
@@ -159,7 +159,7 @@ async function translateText() {
   if (!text) return;
   const isEnFil = direction === 'en-fil';
   const from = isEnFil ? 'en' : 'tl', to = isEnFil ? 'tl' : 'en';
-  lastSpeakLang = isEnFil ? 'fil-PH' : 'en-US';
+  lastSpeakLang = isEnFil ? 'tl' : 'en';
   document.getElementById('textStatusMsg').textContent = '⏳ Nagsasalin...';
   show('textStatusMsg'); hide('textTranslatedBox'); hide('textActionBtns');
   try {
@@ -173,7 +173,7 @@ async function translateText() {
 
 
 function speakNow(text, lang) {
-  const ttsLang = (lang.startsWith('tl')) ? 'tl' : 'en';
+  const ttsLang = (lang.startsWith('tl') || lang.startsWith('fil')) ? 'tl' : 'en';
   const TTS_PROXY = 'https://john-174a7c51.base44.app/functions/tts';
   const chunks = [];
   const maxLen = 180;
