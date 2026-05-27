@@ -173,29 +173,21 @@ async function translateText() {
 
 
 function speakNow(text, lang) {
-  const ttsLang = (lang.startsWith('tl') || lang.startsWith('fil')) ? 'tl' : 'en';
-  const TTS_PROXY = 'https://john-174a7c51.base44.app/functions/tts';
-  const chunks = [];
-  const maxLen = 180;
-  let remaining = text.trim();
-  while (remaining.length > 0) {
-    let chunk = remaining.substring(0, maxLen);
-    const lastSpace = chunk.lastIndexOf(' ');
-    if (remaining.length > maxLen && lastSpace > 0) chunk = chunk.substring(0, lastSpace);
-    chunks.push(chunk.trim());
-    remaining = remaining.substring(chunk.length).trim();
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = (lang.startsWith('tl') || lang.startsWith('fil')) ? 'fil-PH' : 'en-US';
+  u.rate = 0.9; u.volume = 1; u.pitch = 1;
+  function trySpeak() {
+    const voices = window.speechSynthesis.getVoices();
+    const match = voices.find(v => v.lang && (v.lang.startsWith('fil') || v.lang.startsWith('tl')));
+    if (match && u.lang !== 'en-US') u.voice = match;
+    window.speechSynthesis.speak(u);
   }
-  let i = 0;
-  function playNext() {
-    if (i >= chunks.length) return;
-    const src = TTS_PROXY + '?lang=' + ttsLang + '&text=' + encodeURIComponent(chunks[i]);
-    const audio = new Audio(src);
-    audio.onended = () => { i++; playNext(); };
-    audio.onerror = () => { i++; playNext(); };
-    audio.play().catch(() => {});
-    i++;
+  if (window.speechSynthesis.getVoices().length === 0) {
+    window.speechSynthesis.onvoiceschanged = () => { trySpeak(); window.speechSynthesis.onvoiceschanged = null; };
+  } else {
+    trySpeak();
   }
-  playNext();
 }
 function reSpeak() { if (lastTranslated) speakNow(lastTranslated, lastSpeakLang); }
 function reSpeakText() { if (lastTranslated) speakNow(lastTranslated, lastSpeakLang); }
